@@ -1,15 +1,16 @@
 import { createTrainingBlock } from '@/lib/workout';
-import type { TrainingBlockConfig } from '@/types/workout';
+import type { StandardSet, TrainingBlockConfig } from '@/types/workout';
 
 describe('Training Block Generation', () => {
   const defaultConfig: TrainingBlockConfig = {
     name: "First Training Block",
     startDate: new Date('2024-03-20'),
+    inputType: '1rm',
     exercises: [
-      { name: 'Squat', oneRepMax: 315 },
-      { name: 'Bench Press', oneRepMax: 225 },
-      { name: 'Deadlift', oneRepMax: 405 },
-      { name: 'Press', oneRepMax: 135 }
+      { name: 'Squat', inputValue: 315, trainingMaxPercentage: 0.85 },
+      { name: 'Bench Press', inputValue: 225, trainingMaxPercentage: 0.85 },
+      { name: 'Deadlift', inputValue: 405, trainingMaxPercentage: 0.85 },
+      { name: 'Press', inputValue: 135, trainingMaxPercentage: 0.85 }
     ],
     weekProgression: '5/3/1',
     leaderCycles: {
@@ -54,7 +55,7 @@ describe('Training Block Generation', () => {
       block.leaderCycles.forEach((cycle, cycleIndex) => {
         cycle.weeks[0].exercises.forEach(exercise => {
           const increment = exercise.name === 'Press' || exercise.name === 'Bench Press' ? 5 : 10;
-          const baseTrainingMax = defaultConfig.exercises.find(e => e.name === exercise.name)!.oneRepMax * 0.85;
+          const baseTrainingMax = defaultConfig.exercises.find(e => e.name === exercise.name)!.inputValue * 0.85;
           const expectedTM = baseTrainingMax + (increment * cycleIndex);
           expect(exercise.trainingMax).toBe(expectedTM);
         });
@@ -244,7 +245,7 @@ describe('Training Block Generation', () => {
       const finalWeek = block.finalSeventhWeek;
       
       finalWeek.exercises.forEach(exercise => {
-        const baseTrainingMax = defaultConfig.exercises.find(e => e.name === exercise.name)!.oneRepMax * 0.85;
+        const baseTrainingMax = defaultConfig.exercises.find(e => e.name === exercise.name)!.inputValue * 0.85;
         const increment = exercise.name === 'Press' || exercise.name === 'Bench Press' ? 5 : 10;
         const cycles = defaultConfig.leaderCycles.count + defaultConfig.anchorCycles.count;
         const expectedTM = baseTrainingMax + (increment * cycles);
@@ -254,9 +255,9 @@ describe('Training Block Generation', () => {
         // Verify TM test sets use correct percentages of the next cycle's TM
         const mainSets = exercise.sets;
         mainSets.forEach(set => {
-          expect(set.weight % 5).toBe(0);
+          expect((set.weight ?? 0) % 5).toBe(0);
           const expectedWeight = Math.floor((exercise.trainingMax * set.percentage) / 5) * 5;
-          expect(set.weight).toBe(expectedWeight);
+          expect(set.weight ?? 0).toBe(expectedWeight);
         });
 
         // First 3 sets are standard sets
@@ -284,7 +285,7 @@ describe('Training Block Generation', () => {
       const seventhWeek = block.seventhWeek;
       
       seventhWeek.exercises.forEach(exercise => {
-        const baseTrainingMax = defaultConfig.exercises.find(e => e.name === exercise.name)!.oneRepMax * 0.85;
+        const baseTrainingMax = defaultConfig.exercises.find(e => e.name === exercise.name)!.inputValue * 0.85;
         const increment = exercise.name === 'Press' || exercise.name === 'Bench Press' ? 5 : 10;
         const expectedTM = baseTrainingMax + (increment * (defaultConfig.leaderCycles.count - 1));
 

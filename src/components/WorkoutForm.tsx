@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Label } from '@/components/ui/label';
-import type { TrainingBlockConfig } from '@/types/workout';
+import type { TrainingBlockConfig, LiftInputType } from '@/types/workout';
 
 interface WorkoutFormProps {
   onSubmit: (config: TrainingBlockConfig) => void;
@@ -10,11 +10,12 @@ export function WorkoutForm({ onSubmit }: WorkoutFormProps) {
   const [formData, setFormData] = useState<Partial<TrainingBlockConfig>>({
     name: 'New Training Block',
     startDate: new Date(),
+    inputType: '1rm',
     exercises: [
-      { name: 'Squat', oneRepMax: 315, trainingMaxPercentage: 0.85   },
-      { name: 'Bench Press', oneRepMax: 225, trainingMaxPercentage: 0.85 },
-      { name: 'Deadlift', oneRepMax: 405, trainingMaxPercentage: 0.85 },
-      { name: 'Press', oneRepMax: 135, trainingMaxPercentage: 0.85 }
+      { name: 'Squat', inputValue: 315, trainingMaxPercentage: 0.85 },
+      { name: 'Bench Press', inputValue: 225, trainingMaxPercentage: 0.85 },
+      { name: 'Deadlift', inputValue: 405, trainingMaxPercentage: 0.85 },
+      { name: 'Press', inputValue: 135, trainingMaxPercentage: 0.85 }
     ],
     weekProgression: '5/3/1',
     leaderCycles: {
@@ -41,7 +42,7 @@ export function WorkoutForm({ onSubmit }: WorkoutFormProps) {
   };
 
   const isFormValid = () => {
-    return formData.exercises?.every(exercise => exercise.oneRepMax > 0) &&
+    return formData.exercises?.every(exercise => exercise.inputValue > 0) &&
            formData.name?.trim() !== '' &&
            formData.startDate;
   };
@@ -50,7 +51,7 @@ export function WorkoutForm({ onSubmit }: WorkoutFormProps) {
     setFormData(prev => ({
       ...prev,
       exercises: prev.exercises?.map(exercise =>
-        exercise.name === name ? { ...exercise, oneRepMax: value } : exercise
+        exercise.name === name ? { ...exercise, inputValue: value } : exercise
       )
     }));
   };
@@ -83,9 +84,38 @@ export function WorkoutForm({ onSubmit }: WorkoutFormProps) {
         </div>
       </div>
 
+      {/* Input Type Selection */}
+      <div>
+        <Label>Input Type</Label>
+        <div className="flex gap-4 mt-1">
+          <div className="flex items-center">
+            <input
+              type="radio"
+              id="input-type-1rm"
+              name="input-type"
+              checked={formData.inputType === '1rm'}
+              onChange={() => setFormData(prev => ({ ...prev, inputType: '1rm' }))}
+              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+            />
+            <Label htmlFor="input-type-1rm" className="ml-2">1 Rep Max</Label>
+          </div>
+          <div className="flex items-center">
+            <input
+              type="radio"
+              id="input-type-tm"
+              name="input-type"
+              checked={formData.inputType === 'tm'}
+              onChange={() => setFormData(prev => ({ ...prev, inputType: 'tm' }))}
+              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+            />
+            <Label htmlFor="input-type-tm" className="ml-2">Training Max</Label>
+          </div>
+        </div>
+      </div>
+
       {/* Main Lifts */}
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Main Lifts (1RM)</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Main Lifts ({formData.inputType === '1rm' ? '1 Rep Max' : 'Training Max'})</h3>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {formData.exercises?.map(exercise => (
             <div key={exercise.name}>
@@ -93,7 +123,7 @@ export function WorkoutForm({ onSubmit }: WorkoutFormProps) {
               <input
                 type="number"
                 id={exercise.name}
-                value={exercise.oneRepMax || ''}
+                value={exercise.inputValue || ''}
                 onChange={e => handleExerciseChange(exercise.name, Number(e.target.value))}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 min="0"

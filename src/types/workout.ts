@@ -2,6 +2,7 @@
 export interface BaseSet {
   percentage: number;
   type: 'standard' | 'amrap' | 'rep_range';
+  weight?: number;
 }
 
 // Standard set with fixed reps
@@ -69,10 +70,11 @@ export type TrainingBlock = {
 };
 
 export type MainLift = 'Squat' | 'Bench Press' | 'Deadlift' | 'Press';
+export type LiftInputType = '1rm' | 'tm';
 
 export type ExerciseConfig = {
   name: MainLift;
-  oneRepMax: number;
+  inputValue: number;
   trainingMaxPercentage: number; // defaults to 0.85 if not specified
   cycleCount?: number; // tracks how many cycles completed for progressive overload
 };
@@ -80,6 +82,7 @@ export type ExerciseConfig = {
 export type TrainingBlockConfig = {
   name: string;
   startDate: Date;
+  inputType: LiftInputType;
   exercises: ExerciseConfig[];
   weekProgression: WeekProgression;
   leaderCycles: {

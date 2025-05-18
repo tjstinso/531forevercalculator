@@ -14,7 +14,8 @@ import type {
   WeekProgression,
   SupplementalTemplateType,
   Set,
-  Template
+  Template,
+  LiftInputType
 } from '../types/workout';
 
 import {
@@ -38,8 +39,11 @@ const getTrainingMaxIncrement = (liftName: MainLift): number => {
 };
 
 // Helper to calculate training max
-const calculateTrainingMax = (oneRepMax: number, trainingMaxPercentage: number = 0.85): number => {
-  return oneRepMax * trainingMaxPercentage;
+const calculateTrainingMax = (exerciseConfig: ExerciseConfig, inputType: LiftInputType): number => {
+  if (inputType === 'tm') {
+    return exerciseConfig.inputValue;
+  }
+  return exerciseConfig.inputValue * exerciseConfig.trainingMaxPercentage;
 };
 
 // Helper function to get main work sets based on progression type and week progression
@@ -119,15 +123,13 @@ const createCycle = (
   templateType: TemplateType,
   supplementalTemplate?: SupplementalTemplateType,
   cycleIndex: number = 0,
-  weekProgression: WeekProgression = '5/3/1'
+  weekProgression: WeekProgression = '5/3/1',
+  inputType: LiftInputType = '1rm'
 ): Cycle => {
   const weeks: Week[] = [1, 2, 3].map(weekNumber => {
     const exercisesWithSets = exercises.map(exerciseConfig => {
       // Calculate base training max
-      const baseTrainingMax = calculateTrainingMax(
-        exerciseConfig.oneRepMax,
-        exerciseConfig.trainingMaxPercentage
-      );
+      const baseTrainingMax = calculateTrainingMax(exerciseConfig, inputType);
 
       // Apply progressive overload based on cycle count
       const increment = getTrainingMaxIncrement(exerciseConfig.name) * cycleIndex;
@@ -161,7 +163,7 @@ const createCycle = (
       return {
         name: exerciseConfig.name,
         sets,
-        oneRepMax: exerciseConfig.oneRepMax,
+        oneRepMax: inputType === '1rm' ? exerciseConfig.inputValue : exerciseConfig.inputValue / exerciseConfig.trainingMaxPercentage,
         trainingMax
       };
     });
@@ -185,14 +187,12 @@ const createSeventhWeek = (
   exercises: ExerciseConfig[],
   type: SeventhWeekType,
   cycleIndex: number = 0,
-  shouldIncrementTM: boolean = false
+  shouldIncrementTM: boolean = false,
+  inputType: LiftInputType = '1rm'
 ): SeventhWeek => {
   const exercisesWithSets = exercises.map(exerciseConfig => {
     // Calculate base training max
-    const baseTrainingMax = calculateTrainingMax(
-      exerciseConfig.oneRepMax,
-      exerciseConfig.trainingMaxPercentage
-    );
+    const baseTrainingMax = calculateTrainingMax(exerciseConfig, inputType);
 
     // Apply progressive overload based on cycle count
     // For TM test, we test the next block's TM by adding one more increment
@@ -210,7 +210,7 @@ const createSeventhWeek = (
     return {
       name: exerciseConfig.name,
       sets,
-      oneRepMax: exerciseConfig.oneRepMax,
+      oneRepMax: inputType === '1rm' ? exerciseConfig.inputValue : exerciseConfig.inputValue / exerciseConfig.trainingMaxPercentage,
       trainingMax
     };
   });
@@ -233,7 +233,8 @@ export const createTrainingBlock = (config: TrainingBlockConfig): TrainingBlock 
         'leader',
         config.leaderCycles.supplementalTemplate,
         index,
-        config.weekProgression
+        config.weekProgression,
+        config.inputType
       )
     );
 
@@ -242,7 +243,8 @@ export const createTrainingBlock = (config: TrainingBlockConfig): TrainingBlock 
     config.exercises,
     config.seventhWeekStrategy.afterLeader,
     config.leaderCycles.count - 1,
-    false
+    false,
+    config.inputType
   );
 
   // Create anchor cycles with continued progressive overload
@@ -255,7 +257,8 @@ export const createTrainingBlock = (config: TrainingBlockConfig): TrainingBlock 
         'anchor',
         config.anchorCycles.supplementalTemplate,
         config.leaderCycles.count + index,
-        config.weekProgression
+        config.weekProgression,
+        config.inputType
       )
     );
 
@@ -264,7 +267,8 @@ export const createTrainingBlock = (config: TrainingBlockConfig): TrainingBlock 
     config.exercises,
     config.seventhWeekStrategy.afterAnchor,
     config.leaderCycles.count + config.anchorCycles.count - 1,
-    config.seventhWeekStrategy.afterAnchor === 'tm_test'
+    config.seventhWeekStrategy.afterAnchor === 'tm_test',
+    config.inputType
   );
 
   return {

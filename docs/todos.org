@@ -4,10 +4,11 @@
 2. [X] we should be able to choose up to 3 leaders.
 3. [X] when exporting, it is not using the rounded numbers. 
 * features
-1. as a user, i should be able to input either a 1rm or a training max for a lift.
-   1. currently, the application assumes that we're always inputting a 1rm
-   2. this choice should be a radio button and should be properly reflect by the ui
-   3. why does this matter? this may make more sense once we're in the midst of a long running program once we're working largely based off of our TM instead of a 1rm.
+1. [X] as a user, i should be able to input either a 1rm or a training max for a lift.
+   1. [X] currently, the application assumes that we're always inputting a 1rm
+   2. [X] this choice should be a radio button and should be properly reflect by the ui
+   3. [X] why does this matter? this may make more sense once we're in the midst of a long running program once we're working largely based off of our TM instead of a 1rm.
+   4. the name input type isn't that satisfying here, but it works for now.
 2. users should be able to configure their TM % as a relationship to their 1 rep max.
 3. given an external data store, users should be able to append cycles to that store.
    1. ideally this will have start dates in mind.
