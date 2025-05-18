@@ -1,0 +1,16 @@
+#+Title: 531
+* Overview
+The goal of this application is to provide a calculator for the weight lifting program 531 and specifically using the 531 forever system.
+* Program Breakdown
+1. As a user I should be able to input my 1rm for all of the 4 main lifts in 531
+2. the calculator should be able to produce a training block
+3. a training block consists of X cycles. Where X = Y Anchors cycles + Y Leader cycles
+4. Each cycle has some sort of supplemental work associated to it. For example, it should use one of the schemes like FSL, SSL, or BBB
+5. Between each cycle, it is expected that upper body movements increment their TM by 5 pounds and lower body movements increment their TM by 10 pounds.
+6. Between Leader and Anchor cycles, we should perform a 7th week protocol that uses the same TM as the previous cycle. This is typically a deload.
+7. The last week of the block should also be a 7th week protocol. This will also serve as a deload, but will use the TM of the first cycle in the next training block.
+* Functional Requirements
+1. The program must have logic to produce a training block that follows the rules described above.
+2. From the user's perspective, the input should be a website
+3. The output-or final training block- should be rendered on the website as a table
+4. This output should be exportable as a CSV
