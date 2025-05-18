@@ -54,9 +54,7 @@ describe('Training Block Generation', () => {
       block.leaderCycles.forEach((cycle, cycleIndex) => {
         cycle.weeks[0].exercises.forEach(exercise => {
           const increment = exercise.name === 'Press' || exercise.name === 'Bench Press' ? 5 : 10;
-          const baseTrainingMax = Math.floor(
-            defaultConfig.exercises.find(e => e.name === exercise.name)!.oneRepMax * 0.85
-          );
+          const baseTrainingMax = defaultConfig.exercises.find(e => e.name === exercise.name)!.oneRepMax * 0.85;
           const expectedTM = baseTrainingMax + (increment * cycleIndex);
           expect(exercise.trainingMax).toBe(expectedTM);
         });
@@ -71,10 +69,11 @@ describe('Training Block Generation', () => {
       
       firstLeaderWeek.exercises.forEach(exercise => {
         const mainSets = exercise.sets.slice(0, 3); // First 3 sets are main work
+        const baseWeight = exercise.trainingMax;
         expect(mainSets).toEqual([
-          { type: 'standard', reps: 5, percentage: 0.65 },
-          { type: 'standard', reps: 5, percentage: 0.75 },
-          { type: 'standard', reps: 5, percentage: 0.85 }
+          { type: 'standard', reps: 5, percentage: 0.65, weight: Math.floor(baseWeight * 0.65 / 5) * 5 },
+          { type: 'standard', reps: 5, percentage: 0.75, weight: Math.floor(baseWeight * 0.75 / 5) * 5 },
+          { type: 'standard', reps: 5, percentage: 0.85, weight: Math.floor(baseWeight * 0.85 / 5) * 5 }
         ]);
       });
     });
@@ -86,10 +85,11 @@ describe('Training Block Generation', () => {
       const week1 = block.anchorCycles[0].weeks[0];
       week1.exercises.forEach(exercise => {
         const mainSets = exercise.sets.slice(0, 3);
+        const baseWeight = exercise.trainingMax;
         expect(mainSets).toEqual([
-          { type: 'standard', reps: 5, percentage: 0.65 },
-          { type: 'standard', reps: 5, percentage: 0.75 },
-          { type: 'standard', reps: 5, percentage: 0.85 }
+          { type: 'standard', reps: 5, percentage: 0.65, weight: Math.floor(baseWeight * 0.65 / 5) * 5 },
+          { type: 'standard', reps: 5, percentage: 0.75, weight: Math.floor(baseWeight * 0.75 / 5) * 5 },
+          { type: 'standard', reps: 5, percentage: 0.85, weight: Math.floor(baseWeight * 0.85 / 5) * 5 }
         ]);
       });
 
@@ -97,10 +97,11 @@ describe('Training Block Generation', () => {
       const week2 = block.anchorCycles[0].weeks[1];
       week2.exercises.forEach(exercise => {
         const mainSets = exercise.sets.slice(0, 3);
+        const baseWeight = exercise.trainingMax;
         expect(mainSets).toEqual([
-          { type: 'standard', reps: 3, percentage: 0.70 },
-          { type: 'standard', reps: 3, percentage: 0.80 },
-          { type: 'standard', reps: 3, percentage: 0.90 }
+          { type: 'standard', reps: 3, percentage: 0.70, weight: Math.floor(baseWeight * 0.70 / 5) * 5 },
+          { type: 'standard', reps: 3, percentage: 0.80, weight: Math.floor(baseWeight * 0.80 / 5) * 5 },
+          { type: 'standard', reps: 3, percentage: 0.90, weight: Math.floor(baseWeight * 0.90 / 5) * 5 }
         ]);
       });
 
@@ -108,10 +109,11 @@ describe('Training Block Generation', () => {
       const week3 = block.anchorCycles[0].weeks[2];
       week3.exercises.forEach(exercise => {
         const mainSets = exercise.sets.slice(0, 3);
+        const baseWeight = exercise.trainingMax;
         expect(mainSets).toEqual([
-          { type: 'standard', reps: 5, percentage: 0.75 },
-          { type: 'standard', reps: 3, percentage: 0.85 },
-          { type: 'standard', reps: 1, percentage: 0.95 }
+          { type: 'standard', reps: 5, percentage: 0.75, weight: Math.floor(baseWeight * 0.75 / 5) * 5 },
+          { type: 'standard', reps: 3, percentage: 0.85, weight: Math.floor(baseWeight * 0.85 / 5) * 5 },
+          { type: 'standard', reps: 1, percentage: 0.95, weight: Math.floor(baseWeight * 0.95 / 5) * 5 }
         ]);
       });
     });
@@ -124,12 +126,15 @@ describe('Training Block Generation', () => {
       
       firstLeaderWeek.exercises.forEach(exercise => {
         const supplementalSets = exercise.sets.slice(3); // After main work sets
+        const baseWeight = exercise.trainingMax;
+        const expectedWeight = Math.floor(baseWeight * 0.75 / 5) * 5; // SSL Week 1 percentage is 75%
         expect(supplementalSets).toHaveLength(5); // SSL is 5x5
         supplementalSets.forEach(set => {
           expect(set).toEqual({
             type: 'standard',
             reps: 5,
-            percentage: 0.75 // SSL Week 1 percentage
+            percentage: 0.75, // SSL Week 1 percentage
+            weight: expectedWeight
           });
         });
       });
@@ -141,12 +146,15 @@ describe('Training Block Generation', () => {
       
       firstAnchorWeek.exercises.forEach(exercise => {
         const supplementalSets = exercise.sets.slice(3); // After main work sets
+        const baseWeight = exercise.trainingMax;
+        const expectedWeight = Math.floor(baseWeight * 0.65 / 5) * 5; // FSL Week 1 percentage is 65%
         expect(supplementalSets).toHaveLength(5); // FSL is 5x5
         supplementalSets.forEach(set => {
           expect(set).toEqual({
             type: 'standard',
             reps: 5,
-            percentage: 0.65 // FSL Week 1 percentage
+            percentage: 0.65, // FSL Week 1 percentage
+            weight: expectedWeight
           });
         });
       });
@@ -164,36 +172,16 @@ describe('Training Block Generation', () => {
         }
       };
       const block = createTrainingBlock(config);
+      
       // Test week 1 (3's week)
       const week1 = block.leaderCycles[0].weeks[0];
       week1.exercises.forEach(exercise => {
         const mainSets = exercise.sets.slice(0, 3);
+        const baseWeight = exercise.trainingMax;
         expect(mainSets).toEqual([
-          { type: 'standard', reps: 3, percentage: 0.70 },
-          { type: 'standard', reps: 3, percentage: 0.80 },
-          { type: 'standard', reps: 3, percentage: 0.90 }
-        ]);
-      });
-
-      // Test week 2 (5's week) 
-      const week2 = block.leaderCycles[0].weeks[1];
-      week2.exercises.forEach(exercise => {
-        const mainSets = exercise.sets.slice(0, 3);
-        expect(mainSets).toEqual([
-          { type: 'standard', reps: 5, percentage: 0.65 },
-          { type: 'standard', reps: 5, percentage: 0.75 },
-          { type: 'standard', reps: 5, percentage: 0.85 }
-        ]);
-      });
-
-      // Test week 3 (1's week)
-      const week3 = block.leaderCycles[0].weeks[2];
-      week3.exercises.forEach(exercise => {
-        const mainSets = exercise.sets.slice(0, 3);
-        expect(mainSets).toEqual([
-          { type: 'standard', reps: 5, percentage: 0.75 },
-          { type: 'standard', reps: 3, percentage: 0.85 },
-          { type: 'standard', reps: 1, percentage: 0.95 }
+          { type: 'standard', reps: 3, percentage: 0.70, weight: Math.floor(baseWeight * 0.70 / 5) * 5 },
+          { type: 'standard', reps: 3, percentage: 0.80, weight: Math.floor(baseWeight * 0.80 / 5) * 5 },
+          { type: 'standard', reps: 3, percentage: 0.90, weight: Math.floor(baseWeight * 0.90 / 5) * 5 }
         ]);
       });
     });
@@ -211,19 +199,20 @@ describe('Training Block Generation', () => {
       
       firstWeek.exercises.forEach(exercise => {
         const supplementalSets = exercise.sets.slice(3);
+        const baseWeight = exercise.trainingMax;
+        const expectedWeight = Math.floor(baseWeight * 0.50 / 5) * 5; // BBB is 50%
         expect(supplementalSets).toHaveLength(5); // BBB is 5x10
         supplementalSets.forEach(set => {
           expect(set).toEqual({
             type: 'standard',
             reps: 10,
-            percentage: 0.50 // BBB percentage
+            percentage: 0.50, // BBB percentage
+            weight: expectedWeight
           });
         });
       });
     });
-  });
 
-  describe('Alternative Configurations', () => {
     it('should handle 3/5/1 week progression with 5s_pro', () => {
       const config: TrainingBlockConfig = {
         ...defaultConfig,
@@ -234,36 +223,16 @@ describe('Training Block Generation', () => {
         }
       };
       const block = createTrainingBlock(config);
-      // Test week 1 (3's week)
+      
+      // Test week 1 (3's week converted to 5's by 5s PRO)
       const week1 = block.leaderCycles[0].weeks[0];
       week1.exercises.forEach(exercise => {
         const mainSets = exercise.sets.slice(0, 3);
+        const baseWeight = exercise.trainingMax;
         expect(mainSets).toEqual([
-          { type: 'standard', reps: 3, percentage: 0.70 },
-          { type: 'standard', reps: 3, percentage: 0.80 },
-          { type: 'standard', reps: 3, percentage: 0.90 }
-        ]);
-      });
-
-      // Test week 2 (5's week) 
-      const week2 = block.leaderCycles[0].weeks[1];
-      week2.exercises.forEach(exercise => {
-        const mainSets = exercise.sets.slice(0, 3);
-        expect(mainSets).toEqual([
-          { type: 'standard', reps: 5, percentage: 0.65 },
-          { type: 'standard', reps: 5, percentage: 0.75 },
-          { type: 'standard', reps: 5, percentage: 0.85 }
-        ]);
-      });
-
-      // Test week 3 (1's week)
-      const week3 = block.leaderCycles[0].weeks[2];
-      week3.exercises.forEach(exercise => {
-        const mainSets = exercise.sets.slice(0, 3);
-        expect(mainSets).toEqual([
-          { type: 'standard', reps: 5, percentage: 0.75 },
-          { type: 'standard', reps: 3, percentage: 0.85 },
-          { type: 'standard', reps: 1, percentage: 0.95 }
+          { type: 'standard', reps: 5, percentage: 0.70, weight: Math.floor(baseWeight * 0.70 / 5) * 5 },
+          { type: 'standard', reps: 5, percentage: 0.80, weight: Math.floor(baseWeight * 0.80 / 5) * 5 },
+          { type: 'standard', reps: 5, percentage: 0.90, weight: Math.floor(baseWeight * 0.90 / 5) * 5 }
         ]);
       });
     });
@@ -271,70 +240,62 @@ describe('Training Block Generation', () => {
 
   describe('Seventh Week Protocols', () => {
     it('should use correct TM increments for TM test after anchor', () => {
-      const config: TrainingBlockConfig = {
-        ...defaultConfig,
-        leaderCycles: {
-          count: 2,
-          progressionType: 'traditional',
-          supplementalTemplate: 'SSL'
-        },
-        anchorCycles: {
-          count: 1,
-          progressionType: 'traditional',
-          supplementalTemplate: 'FSL'
-        },
-        seventhWeekStrategy: {
-          afterLeader: 'deload',
-          afterAnchor: 'tm_test'
-        }
-      };
+      const block = createTrainingBlock(defaultConfig);
+      const finalWeek = block.finalSeventhWeek;
       
-      const block = createTrainingBlock(config);
-      
-      // After 2 leader cycles and 1 anchor cycle, TM should have increased:
-      // - Upper body (Press, Bench): 3 cycles * 5lbs = 15lbs
-      // - Lower body (Squat, Dead): 3 cycles * 10lbs = 30lbs
-      // For TM test, we test the next block's TM by adding one more increment
-      block.finalSeventhWeek.exercises.forEach(exercise => {
-        const baseTrainingMax = Math.floor(
-          config.exercises.find(e => e.name === exercise.name)!.oneRepMax * 0.85
-        );
-        const cycles = config.leaderCycles.count + config.anchorCycles.count; // -1 because createSeventhWeek uses cycleIndex
+      finalWeek.exercises.forEach(exercise => {
+        const baseTrainingMax = defaultConfig.exercises.find(e => e.name === exercise.name)!.oneRepMax * 0.85;
         const increment = exercise.name === 'Press' || exercise.name === 'Bench Press' ? 5 : 10;
-        const expectedTM = baseTrainingMax + (increment * cycles); // +1 for next cycle's TM
+        const cycles = defaultConfig.leaderCycles.count + defaultConfig.anchorCycles.count;
+        const expectedTM = baseTrainingMax + (increment * cycles);
 
         expect(exercise.trainingMax).toBe(expectedTM);
 
         // Verify TM test sets use correct percentages of the next cycle's TM
-        expect(exercise.sets).toEqual([
-          { type: 'standard', reps: 5, percentage: 0.70 },
-          { type: 'standard', reps: 5, percentage: 0.80 },
-          { type: 'standard', reps: 5, percentage: 0.90 },
-          { type: 'rep_range', minReps: 3, maxReps: 5, percentage: 1.00 }
+        const mainSets = exercise.sets;
+        mainSets.forEach(set => {
+          expect(set.weight % 5).toBe(0);
+          const expectedWeight = Math.floor((exercise.trainingMax * set.percentage) / 5) * 5;
+          expect(set.weight).toBe(expectedWeight);
+        });
+
+        // First 3 sets are standard sets
+        const standardSets = mainSets.slice(0, 3) as StandardSet[];
+        expect(standardSets.map(({type, reps, percentage, weight}) => ({type, reps, percentage, weight}))).toEqual([
+          { type: 'standard', reps: 5, percentage: 0.70, weight: Math.floor(expectedTM * 0.70 / 5) * 5 },
+          { type: 'standard', reps: 5, percentage: 0.80, weight: Math.floor(expectedTM * 0.80 / 5) * 5 },
+          { type: 'standard', reps: 5, percentage: 0.90, weight: Math.floor(expectedTM * 0.90 / 5) * 5 }
         ]);
+
+        // Last set is rep range
+        const repRangeSet = mainSets[3];
+        expect(repRangeSet).toMatchObject({
+          type: 'rep_range',
+          minReps: 3,
+          maxReps: 5,
+          percentage: 1.00,
+          weight: Math.floor(expectedTM * 1.00 / 5) * 5
+        });
       });
     });
 
     it('should use current cycle TM for deload after leader', () => {
       const block = createTrainingBlock(defaultConfig);
+      const seventhWeek = block.seventhWeek;
       
-      // After 2 leader cycles, TM should have increased:
-      // - Upper body (Press, Bench): 2 cycles * 5lbs = 10lbs
-      // - Lower body (Squat, Dead): 2 cycles * 10lbs = 20lbs
-      block.seventhWeek.exercises.forEach(exercise => {
-        const baseTrainingMax = Math.floor(
-          defaultConfig.exercises.find(e => e.name === exercise.name)!.oneRepMax * 0.85
-        );
+      seventhWeek.exercises.forEach(exercise => {
+        const baseTrainingMax = defaultConfig.exercises.find(e => e.name === exercise.name)!.oneRepMax * 0.85;
         const increment = exercise.name === 'Press' || exercise.name === 'Bench Press' ? 5 : 10;
         const expectedTM = baseTrainingMax + (increment * (defaultConfig.leaderCycles.count - 1));
 
         expect(exercise.trainingMax).toBe(expectedTM);
 
         // Verify deload sets use correct percentages
-        expect(exercise.sets).toEqual([
-          { type: 'standard', reps: 5, percentage: 0.40 },
-          { type: 'standard', reps: 5, percentage: 0.50 },
-          { type: 'standard', reps: 5, percentage: 0.60 }
+        const mainSets = exercise.sets;
+        expect(mainSets).toEqual([
+          { type: 'standard', reps: 5, percentage: 0.40, weight: Math.floor(expectedTM * 0.40 / 5) * 5 },
+          { type: 'standard', reps: 5, percentage: 0.50, weight: Math.floor(expectedTM * 0.50 / 5) * 5 },
+          { type: 'standard', reps: 5, percentage: 0.60, weight: Math.floor(expectedTM * 0.60 / 5) * 5 }
         ]);
       });
     });

@@ -11,10 +11,10 @@ export function WorkoutForm({ onSubmit }: WorkoutFormProps) {
     name: 'New Training Block',
     startDate: new Date(),
     exercises: [
-      { name: 'Squat', oneRepMax: 315 },
-      { name: 'Bench Press', oneRepMax: 225 },
-      { name: 'Deadlift', oneRepMax: 405 },
-      { name: 'Press', oneRepMax: 135 }
+      { name: 'Squat', oneRepMax: 315, trainingMaxPercentage: 0.85   },
+      { name: 'Bench Press', oneRepMax: 225, trainingMaxPercentage: 0.85 },
+      { name: 'Deadlift', oneRepMax: 405, trainingMaxPercentage: 0.85 },
+      { name: 'Press', oneRepMax: 135, trainingMaxPercentage: 0.85 }
     ],
     weekProgression: '5/3/1',
     leaderCycles: {
@@ -159,6 +159,21 @@ export function WorkoutForm({ onSubmit }: WorkoutFormProps) {
                   className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                 />
                 <Label htmlFor="leaderCount2" className="ml-2">2 Cycles</Label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="leaderCount3"
+                  name="leaderCount"
+                  value={3}
+                  checked={formData.leaderCycles?.count === 3}
+                  onChange={e => setFormData(prev => ({
+                    ...prev,
+                    leaderCycles: { ...prev.leaderCycles!, count: 3 }
+                  }))}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                />
+                <Label htmlFor="leaderCount3" className="ml-2">3 Cycles</Label>
               </div>
             </div>
           </div>

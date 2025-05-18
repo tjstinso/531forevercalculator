@@ -5,6 +5,7 @@ import { TrainingTable } from '@/components/TrainingTable';
 import { useState } from 'react';
 import type { TrainingBlockConfig } from '@/types/workout';
 import { createTrainingBlock } from '@/lib/workout';
+import { formatSet } from '@/utils/format';
 
 export default function Home() {
   const [trainingBlock, setTrainingBlock] = useState<ReturnType<typeof createTrainingBlock> | null>(null);
@@ -22,17 +23,6 @@ export default function Home() {
       ['Week', 'Type', 'Exercise', 'Training Max', 'Sets'],
     ];
 
-    // Helper function to format sets
-    const formatSet = (set: any, trainingMax: number) => {
-      if (set.type === 'rep_range') {
-        return `${Math.round(trainingMax * set.percentage)}lbs x ${set.minReps}-${set.maxReps}`;
-      }
-      if (set.type === 'amrap') {
-        return `${Math.round(trainingMax * set.percentage)}lbs x AMRAP`;
-      }
-      return `${Math.round(trainingMax * set.percentage)}lbs x ${set.reps}`;
-    };
-
     // Add leader cycles
     trainingBlock.leaderCycles.forEach((cycle, cycleIndex) => {
       cycle.weeks.forEach((week, weekIndex) => {
@@ -41,8 +31,8 @@ export default function Home() {
             `Week ${cycleIndex * 3 + weekIndex + 1}`,
             `Leader ${cycleIndex + 1} - Week ${weekIndex + 1}`,
             exercise.name,
-            exercise.trainingMax.toString(),
-            exercise.sets.map(set => formatSet(set, exercise.trainingMax)).join(', ')
+            `${exercise.trainingMax} lbs`,
+            exercise.sets.map(set => formatSet(set, exercise.trainingMax, false)).join(', ')
           ]);
         });
       });
@@ -54,8 +44,8 @@ export default function Home() {
         'Deload Week',
         'Deload',
         exercise.name,
-        exercise.trainingMax.toString(),
-        exercise.sets.map(set => formatSet(set, exercise.trainingMax)).join(', ')
+        `${exercise.trainingMax} lbs`,
+        exercise.sets.map(set => formatSet(set, exercise.trainingMax, false)).join(', ')
       ]);
     });
 
@@ -67,8 +57,8 @@ export default function Home() {
             `Week ${(trainingBlock.leaderCycles.length * 3) + 1 + cycleIndex * 3 + weekIndex}`,
             `Anchor ${cycleIndex + 1} - Week ${weekIndex + 1}`,
             exercise.name,
-            exercise.trainingMax.toString(),
-            exercise.sets.map(set => formatSet(set, exercise.trainingMax)).join(', ')
+            `${exercise.trainingMax} lbs`,
+            exercise.sets.map(set => formatSet(set, exercise.trainingMax, false)).join(', ')
           ]);
         });
       });
@@ -80,8 +70,8 @@ export default function Home() {
         'Final Week',
         trainingBlock.finalSeventhWeek.type === 'tm_test' ? 'TM Test' : 'Deload',
         exercise.name,
-        exercise.trainingMax.toString(),
-        exercise.sets.map(set => formatSet(set, exercise.trainingMax)).join(', ')
+        `${exercise.trainingMax} lbs`,
+        exercise.sets.map(set => formatSet(set, exercise.trainingMax, false)).join(', ')
       ]);
     });
 

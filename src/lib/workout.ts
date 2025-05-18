@@ -26,6 +26,11 @@ import {
   MAIN_LIFTS
 } from '../constants/workout';
 
+// Helper to round weight to nearest 5 lbs
+const roundWeight = (weight: number): number => {
+  return Math.floor(weight / 5) * 5;
+};
+
 // Helper to determine training max increment based on lift type
 const getTrainingMaxIncrement = (liftName: MainLift): number => {
   // Upper body lifts increase by 5, lower body by 10
@@ -34,7 +39,7 @@ const getTrainingMaxIncrement = (liftName: MainLift): number => {
 
 // Helper to calculate training max
 const calculateTrainingMax = (oneRepMax: number, trainingMaxPercentage: number = 0.85): number => {
-  return Math.floor(oneRepMax * trainingMaxPercentage);
+  return oneRepMax * trainingMaxPercentage;
 };
 
 // Helper function to get main work sets based on progression type and week progression
@@ -132,8 +137,11 @@ const createCycle = (
       const mainWork = getMainWorkSets(progressionType, weekProgression);
       const weekKey = `week${weekNumber}` as keyof Template;
       
-      // Initialize sets with main work
-      let sets = [...mainWork[weekKey].mainSets];
+      // Initialize sets with main work and calculate rounded weights
+      let sets = [...mainWork[weekKey].mainSets].map(set => ({
+        ...set,
+        weight: roundWeight(trainingMax * set.percentage)
+      }));
 
       // Add supplemental work if specified
       if (supplementalTemplate) {
@@ -142,7 +150,12 @@ const createCycle = (
           supplementalTemplate === 'SSL' ? getSSLTemplate(progressionType, templateType) :
           getBBBTemplate(progressionType, templateType);
         
-        sets = [...sets, ...template[weekKey].supplementalSets];
+        const supplementalSets = template[weekKey].supplementalSets.map(set => ({
+          ...set,
+          weight: roundWeight(trainingMax * set.percentage)
+        }));
+        
+        sets = [...sets, ...supplementalSets];
       }
 
       return {
@@ -172,7 +185,7 @@ const createSeventhWeek = (
   exercises: ExerciseConfig[],
   type: SeventhWeekType,
   cycleIndex: number = 0,
-  shouldIncrementTM: boolean = false // Add flag for TM test specifically
+  shouldIncrementTM: boolean = false
 ): SeventhWeek => {
   const exercisesWithSets = exercises.map(exerciseConfig => {
     // Calculate base training max
@@ -188,9 +201,15 @@ const createSeventhWeek = (
     );
     const trainingMax = baseTrainingMax + increment;
 
+    // Get sets from template and calculate rounded weights
+    const sets = SEVENTH_WEEK_TEMPLATES[type].mainSets.map(set => ({
+      ...set,
+      weight: roundWeight(trainingMax * set.percentage)
+    }));
+
     return {
       name: exerciseConfig.name,
-      sets: SEVENTH_WEEK_TEMPLATES[type].mainSets,
+      sets,
       oneRepMax: exerciseConfig.oneRepMax,
       trainingMax
     };

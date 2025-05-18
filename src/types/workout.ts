@@ -73,7 +73,7 @@ export type MainLift = 'Squat' | 'Bench Press' | 'Deadlift' | 'Press';
 export type ExerciseConfig = {
   name: MainLift;
   oneRepMax: number;
-  trainingMaxPercentage?: number; // defaults to 0.85 if not specified
+  trainingMaxPercentage: number; // defaults to 0.85 if not specified
   cycleCount?: number; // tracks how many cycles completed for progressive overload
 };
 
@@ -83,7 +83,7 @@ export type TrainingBlockConfig = {
   exercises: ExerciseConfig[];
   weekProgression: WeekProgression;
   leaderCycles: {
-    count: 1 | 2;
+    count: 1 | 2 | 3;
     progressionType: ProgressionType;
     supplementalTemplate?: SupplementalTemplateType;
   };
