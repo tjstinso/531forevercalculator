@@ -1,0 +1,6 @@
+#+Title: open issues
+* bugs
+1. we should be able to choose up to 3 leaders.
+2. start date isn't doing anything here.
+3. when exporting, it is not using the rounded numbers. 
+* features
