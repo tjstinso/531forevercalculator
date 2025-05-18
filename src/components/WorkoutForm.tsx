@@ -56,6 +56,15 @@ export function WorkoutForm({ onSubmit }: WorkoutFormProps) {
     }));
   };
 
+  const handleTrainingMaxPercentageChange = (name: string, value: number) => {
+    setFormData(prev => ({
+      ...prev,
+      exercises: prev.exercises?.map(exercise =>
+        exercise.name === name ? { ...exercise, trainingMaxPercentage: value } : exercise
+      )
+    }));
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Basic Information */}
@@ -118,17 +127,40 @@ export function WorkoutForm({ onSubmit }: WorkoutFormProps) {
         <h3 className="text-lg font-medium text-gray-900 mb-4">Main Lifts ({formData.inputType === '1rm' ? '1 Rep Max' : 'Training Max'})</h3>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {formData.exercises?.map(exercise => (
-            <div key={exercise.name}>
-              <Label htmlFor={exercise.name}>{exercise.name}</Label>
-              <input
-                type="number"
-                id={exercise.name}
-                value={exercise.inputValue || ''}
-                onChange={e => handleExerciseChange(exercise.name, Number(e.target.value))}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                min="0"
-                required
-              />
+            <div key={exercise.name} className="space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor={exercise.name}>{exercise.name}</Label>
+                  <input
+                    type="number"
+                    id={exercise.name}
+                    value={exercise.inputValue || ''}
+                    onChange={e => handleExerciseChange(exercise.name, Number(e.target.value))}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    min="0"
+                    required
+                  />
+                </div>
+                {formData.inputType === '1rm' && (
+                  <div>
+                    <div className="flex items-center gap-4">
+                      <Label htmlFor={`${exercise.name}-tm-percentage`} className="whitespace-nowrap">Training Max %</Label>
+                      <input
+                        type="number"
+                        id={`${exercise.name}-tm-percentage`}
+                        value={exercise.trainingMaxPercentage * 100 || ''}
+                        onChange={e => handleTrainingMaxPercentageChange(exercise.name, Number(e.target.value) / 100)}
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        min="1"
+                        max="100"
+                        step="1"
+                        required
+                      />
+                      <span className="text-gray-500">%</span>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
