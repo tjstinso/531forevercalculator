@@ -111,7 +111,7 @@ export function TrainingTable({ trainingBlock }: TrainingTableProps) {
                     .find(e => e.name === exercise.name)
                     ?.sets.map((set, setIndex) => (
                       <div key={setIndex} className="mb-1 last:mb-0">
-                        {formatSet(set, exercise.trainingMax)}
+                        {formatSet(set, week.exercises.find(e => e.name === exercise.name)?.trainingMax || 0)}
                       </div>
                     ))}
                 </td>

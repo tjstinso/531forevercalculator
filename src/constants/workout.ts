@@ -116,9 +116,10 @@ export const FIVE_PRO_351_MAIN_WORK: Template = {
 export const SEVENTH_WEEK_TEMPLATES = {
   deload: {
     mainSets: [
-      { type: 'standard', reps: 5, percentage: 0.40, weight: 0 } as StandardSet,
-      { type: 'standard', reps: 5, percentage: 0.50, weight: 0 } as StandardSet,
-      { type: 'standard', reps: 5, percentage: 0.60, weight: 0 } as StandardSet,
+      { type: 'standard', reps: 5, percentage: 0.70, weight: 0 } as StandardSet,
+      { type: 'rep_range', minReps: 3, maxReps: 5, percentage: 0.80, weight: 0 } as RepRangeSet,
+      { type: 'standard', reps: 1, percentage: .9, weight: 0 } as StandardSet,
+      { type: 'standard', reps: 1, percentage: 1, weight: 0 } as StandardSet,
     ],
     supplementalSets: [] as Set[], // No supplemental work during deload
   },
