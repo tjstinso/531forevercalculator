@@ -294,9 +294,10 @@ describe('Training Block Generation', () => {
         // Verify deload sets use correct percentages
         const mainSets = exercise.sets;
         expect(mainSets).toEqual([
-          { type: 'standard', reps: 5, percentage: 0.40, weight: Math.floor(expectedTM * 0.40 / 5) * 5 },
-          { type: 'standard', reps: 5, percentage: 0.50, weight: Math.floor(expectedTM * 0.50 / 5) * 5 },
-          { type: 'standard', reps: 5, percentage: 0.60, weight: Math.floor(expectedTM * 0.60 / 5) * 5 }
+          { type: 'standard', reps: 5, percentage: 0.70, weight: Math.floor(expectedTM * 0.70 / 5) * 5 },
+          { type: 'rep_range', minReps: 3, maxReps: 5, percentage: 0.80, weight: Math.floor(expectedTM * 0.80 / 5) * 5 },
+          { type: 'standard', reps: 1, percentage: 0.90, weight: Math.floor(expectedTM * 0.90 / 5) * 5 },
+          { type: 'standard', reps: 1, percentage: 1.0, weight: Math.floor(expectedTM / 5) * 5 }
         ]);
       });
     });
