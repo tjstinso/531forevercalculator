@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { TokenResponse } from '@react-oauth/google';
+import { Credentials } from '@/types/auth';
 
 interface GoogleExportProps {
   data: any[][];
   title: string;
   sheetName?: string;
-  token: TokenResponse;
+  token: Credentials;
   sourceSpreadsheetId?: string;
   setSourceSpreadsheetId: (id: string) => void;
 }

@@ -3,6 +3,7 @@ import { Label } from '@/components/ui/label';
 import type { TrainingBlockConfig, LiftInputType } from '@/types/workout';
 import { TokenResponse } from '@react-oauth/google';
 import { SPREADSHEET_IDENTIFIER } from '@/constants/workout';
+import { Credentials } from '@/types/auth';
 
 interface Spreadsheet {
   id: string;
@@ -12,7 +13,7 @@ interface Spreadsheet {
 
 interface WorkoutFormProps {
   onSubmit: (config: TrainingBlockConfig) => void;
-  token?: TokenResponse;
+  token?: Credentials;
 }
 
 export function WorkoutForm({ onSubmit, token }: WorkoutFormProps) {

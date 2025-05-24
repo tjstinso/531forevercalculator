@@ -1,10 +1,10 @@
-import { TokenResponse } from '@react-oauth/google';
+import { CodeResponse, TokenResponse } from '@react-oauth/google';
 import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
-import { OAuth2Client } from 'google-auth-library';
+import { Credentials, OAuth2Client } from 'google-auth-library';
 
 const SPREADSHEET_IDENTIFIER = '531_TS_WORKOUT_PLAN'; 
-const createOAuth2Client = (credentialResponse: TokenResponse) => {
+const createOAuth2Client = (credentialResponse: Credentials) => {
     let _client = new OAuth2Client();
     _client.setCredentials({
         access_token: credentialResponse.access_token,
@@ -15,7 +15,6 @@ const createOAuth2Client = (credentialResponse: TokenResponse) => {
     return _client;
 }
 
-// List all spreadsheets created by the user
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -108,6 +107,7 @@ export async function POST(request: Request) {
      } = await request.json();
 
     let client = createOAuth2Client(token as TokenResponse);
+
     let drive = google.drive({ version: 'v3', auth: client });
     let sheets = google.sheets({ version: 'v4', auth: client });
 

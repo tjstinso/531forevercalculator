@@ -19,8 +19,18 @@
       1. [X] can we scope this further such that we only look at spreadsheets associated to this application?
 	 1. since we have to first query google drive then filter down on the spreadsheet api, this gets expensive. Using some normalized name of files would solve this but it is a little clunkier. I think this is an OK approach for our purposes.
    4. [X] if choosing an existing spreadsheet, we should auto-populate the training maxes from the last 7th week protocol
-4. [ ] The identity should be persisted across sessions.
-   1. [ ] ultimately this means we'll need a database. sqlite or some inmemory provider should be fine
-5. [X] there should be multiple sheets.
+4. [X] there should be multiple sheets.
    1. [X] one that represents a complete history
    2. [X] one that represents the current training block
+5. [-] The identity should be persisted across sessions.
+   1. [X] ultimately this means we'll need a database. sqlite or some inmemory provider should be fine
+   2. [X] we should be caching the token data retrieved by google
+   3. [X] in the case of an expired user token, we should use the refresh token to get accesso
+      1. [X] this should be done when the user is opening the website
+      2. [X] it should be a non-blocking operation
+      3. [X] it should be apparent to the user that the backend is performing some auth related action
+   4. [ ] is this done securely?
+	 
+6. [X] when the application has the user credential, it should be reflected on the website itself. The login button shouldn't really appear.
+   1. this has  been done to an extent, but the website now requires google based auth.
+   2. Ideally, there should just be a header with a login button at the top of the page. Which would then reflect the users identity in the case that they're logged in.
