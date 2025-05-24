@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -8,6 +9,8 @@ export const metadata: Metadata = {
   title: '5/3/1 Forever Calculator',
   description: 'Calculate your 5/3/1 Forever training blocks with ease',
 };
+
+console.log(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
 
 export default function RootLayout({
   children,
@@ -23,7 +26,9 @@ export default function RootLayout({
           </div>
         </header>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {children}
+          <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
+            {children}
+          </GoogleOAuthProvider>
         </main>
         <footer className="bg-white shadow-sm mt-auto">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">

@@ -144,3 +144,6 @@ export const SEVENTH_WEEK_TEMPLATES = {
 };
 
 export const MAIN_LIFTS = ['Squat', 'Bench Press', 'Deadlift', 'Press'] as const; 
+
+// Constant to identify spreadsheets created by this application
+export const SPREADSHEET_IDENTIFIER = '531_TS_WORKOUT_PLAN'; 

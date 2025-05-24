@@ -5,13 +5,22 @@
 3. [X] when exporting, it is not using the rounded numbers. 
 * features
 1. [X] as a user, i should be able to input either a 1rm or a training max for a lift.
-   1. [X] currently, the application assumes that we're always inputting a 1rm
+   1. [X] currently, the aplication assumes that we're always inputting a 1rm
    2. [X] this choice should be a radio button and should be properly reflect by the ui
    3. [X] why does this matter? this may make more sense once we're in the midst of a long running program once we're working largely based off of our TM instead of a 1rm.
    4. the name input type isn't that satisfying here, but it works for now.
 2. [X] users should be able to configure their TM % as a relationship to their 1 rep max.
    1. Currently, the underlying type allows for an input, but the program itself just defaults to 85%.
    2. Users should be able to input a value in the range of 80-90%.
-3. [ ] given an external data store, users should be able to append cycles to that store. 
-   1. for the first iteration of this feature, let's use google sheets as as the target SDK.
-   2. if a user provides a google sheet, we should be able to dump the program into it
+3. [-] As a user, I want to export my table to google sheets.
+   1. [X] I should be able to choose if I want to export to a new sheet or append to an existing one.
+   2. [X] in the case of a new spreadsheet, i should be able to designate a name
+   3. [ ] users should be able to view all available spreadsheets
+      1. [ ] can we scope this further such that we only look at spreadsheets associated to this application?
+	 1. since we have to first query google drive then filter down on the spreadsheet api, this gets expensive. Using some normalized name of files would solve this but it is a little clunkier. I think this is an OK approach for our purposes.
+   4. [X] if choosing an existing spreadsheet, we should auto-populate the training maxes from the last 7th week protocol
+4. [ ] The identity should be persisted across sessions.
+   1. [ ] ultimately this means we'll need a database. sqlite or some inmemory provider should be fine
+5. [ ] there should be multiple sheets.
+   1. [ ] one that represents a complete history
+   2. [ ] one that represents the current training block

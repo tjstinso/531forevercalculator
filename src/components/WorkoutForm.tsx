@@ -1,12 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import type { TrainingBlockConfig, LiftInputType } from '@/types/workout';
+import { TokenResponse } from '@react-oauth/google';
+import { SPREADSHEET_IDENTIFIER } from '@/constants/workout';
+
+interface Spreadsheet {
+  id: string;
+  name: string;
+  createdTime: string;
+}
 
 interface WorkoutFormProps {
   onSubmit: (config: TrainingBlockConfig) => void;
+  token?: TokenResponse;
 }
 
-export function WorkoutForm({ onSubmit }: WorkoutFormProps) {
+export function WorkoutForm({ onSubmit, token }: WorkoutFormProps) {
+  const [workoutType, setWorkoutType] = useState<'new' | 'extend'>('new');
+  const [sourceSpreadsheetId, setSourceSpreadsheetId] = useState<string>('');
+  const [spreadsheets, setSpreadsheets] = useState<Spreadsheet[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<TrainingBlockConfig>>({
     name: 'New Training Block',
     startDate: new Date(),
@@ -34,17 +48,82 @@ export function WorkoutForm({ onSubmit }: WorkoutFormProps) {
     }
   });
 
+  useEffect(() => {
+    const fetchSpreadsheets = async () => {
+      if (!token) return;
+      
+      try {
+        setIsLoading(true);
+        const response = await fetch(`/api/export?token=${encodeURIComponent(JSON.stringify(token))}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch spreadsheets');
+        }
+        const result = await response.json();
+        setSpreadsheets(result.spreadsheets || []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch spreadsheets');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (workoutType === 'extend') {
+      fetchSpreadsheets();
+    }
+  }, [token, workoutType]);
+
+  const fetchTrainingMaxes = async (spreadsheetId: string) => {
+    if (!token) return;
+
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/export?token=${encodeURIComponent(JSON.stringify(token))}&spreadsheetId=${spreadsheetId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch training maxes');
+      }
+      const result = await response.json();
+      
+      if (result.trainingMaxes) {
+        setFormData(prev => ({
+          ...prev,
+          inputType: 'tm',
+          exercises: prev.exercises?.map(exercise => ({
+            ...exercise,
+            inputValue: result.trainingMaxes[exercise.name] || exercise.inputValue,
+            trainingMaxPercentage: 1 // Since we're using the actual training max
+          }))
+        }));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch training maxes');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSpreadsheetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const id = e.target.value;
+    setSourceSpreadsheetId(id);
+    if (id) {
+      fetchTrainingMaxes(id);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isFormValid()) {
-      onSubmit(formData as TrainingBlockConfig);
+      onSubmit({
+        ...formData as TrainingBlockConfig,
+        sourceSpreadsheetId: workoutType === 'extend' ? sourceSpreadsheetId : undefined
+      });
     }
   };
 
   const isFormValid = () => {
     return formData.exercises?.every(exercise => exercise.inputValue > 0) &&
            formData.name?.trim() !== '' &&
-           formData.startDate;
+           formData.startDate &&
+           (workoutType === 'new' || (workoutType === 'extend' && sourceSpreadsheetId));
   };
 
   const handleExerciseChange = (name: string, value: number) => {
@@ -67,19 +146,82 @@ export function WorkoutForm({ onSubmit }: WorkoutFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Workout Type Selection */}
+      <div>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Workout Type</h3>
+        <div className="flex gap-4">
+          <div className="flex items-center">
+            <input
+              type="radio"
+              id="workout-type-new"
+              name="workout-type"
+              checked={workoutType === 'new'}
+              onChange={() => setWorkoutType('new')}
+              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+            />
+            <Label htmlFor="workout-type-new" className="ml-2">New Workout</Label>
+          </div>
+          <div className="flex items-center">
+            <input
+              type="radio"
+              id="workout-type-extend"
+              name="workout-type"
+              checked={workoutType === 'extend'}
+              onChange={() => setWorkoutType('extend')}
+              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+              disabled={!token}
+            />
+            <Label htmlFor="workout-type-extend" className="ml-2">Extend Existing Workout</Label>
+          </div>
+        </div>
+
+        {workoutType === 'extend' && (
+          <div className="mt-4">
+            <Label htmlFor="sourceSpreadsheet">Source Spreadsheet</Label>
+            {isLoading ? (
+              <div className="mt-1 text-sm text-gray-500">Loading spreadsheets...</div>
+            ) : error ? (
+              <div className="mt-1 text-sm text-red-500">{error}</div>
+            ) : !token ? (
+              <div className="mt-1 text-sm text-gray-500">Please log in with Google to access your spreadsheets</div>
+            ) : (
+              <select
+                id="sourceSpreadsheet"
+                value={sourceSpreadsheetId}
+                onChange={handleSpreadsheetChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                required
+              >
+                <option value="">Select a spreadsheet</option>
+                {spreadsheets.map((spreadsheet) => (
+                  <option key={spreadsheet.id} value={spreadsheet.id}>
+                    {spreadsheet.name.replace(` - ${SPREADSHEET_IDENTIFIER}`, '')}
+                  </option>
+                ))}
+              </select>
+            )}
+            <p className="mt-1 text-sm text-gray-500">
+              Select the Google Sheet containing your existing workout plan. Training maxes will be automatically populated from the final week.
+            </p>
+          </div>
+        )}
+      </div>
+
       {/* Basic Information */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <div>
-          <Label htmlFor="blockName">Block Name</Label>
-          <input
-            type="text"
-            id="blockName"
-            value={formData.name}
-            onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            required
-          />
-        </div>
+        {workoutType === 'new' && (
+          <div>
+            <Label htmlFor="workoutName">Workout Name</Label>
+            <input
+              type="text"
+              id="workoutName"
+              value={formData.name}
+              onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              required
+            />
+          </div>
+        )}
         <div>
           <Label htmlFor="startDate">Start Date</Label>
           <input

@@ -99,6 +99,7 @@ export type TrainingBlockConfig = {
     afterLeader: SeventhWeekType;
     afterAnchor: SeventhWeekType;
   };
+  sourceSpreadsheetId?: string; // Optional ID of the source spreadsheet when extending an existing workout
 };
 
 export interface TemplateWeek {
