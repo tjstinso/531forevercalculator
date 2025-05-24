@@ -7,9 +7,10 @@ interface GoogleExportProps {
   sheetName?: string;
   token: TokenResponse;
   sourceSpreadsheetId?: string;
+  setSourceSpreadsheetId: (id: string) => void;
 }
 
-export function GoogleExport({ data, title, sheetName, token, sourceSpreadsheetId }: GoogleExportProps) {
+export function GoogleExport({ data, title, sheetName, token, sourceSpreadsheetId, setSourceSpreadsheetId }: GoogleExportProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exportUrl, setExportUrl] = useState<string | null>(null);
@@ -40,6 +41,7 @@ export function GoogleExport({ data, title, sheetName, token, sourceSpreadsheetI
 
       const result = await response.json();
       setExportUrl(result.url);
+      setSourceSpreadsheetId(result.spreadsheetId);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to export to Google Sheets');
     } finally {

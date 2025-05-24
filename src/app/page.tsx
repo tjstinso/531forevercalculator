@@ -163,6 +163,7 @@ export default function Home() {
                   sheetName="Training Plan"
                   token={token}
                   sourceSpreadsheetId={sourceSpreadsheetId}
+                  setSourceSpreadsheetId={setSourceSpreadsheetId}
                 />
               )}
             </div>

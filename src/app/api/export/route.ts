@@ -36,28 +36,10 @@ export async function GET(request: Request) {
     if (spreadsheetId) {
       let sheets = google.sheets({ version: 'v4', auth: client });
       
-      // Get all sheets in the spreadsheet
-      const spreadsheet = await sheets.spreadsheets.get({
-        spreadsheetId,
-        fields: 'sheets.properties.title',
-      });
-
-      // Find the sheet with the training plan
-      const trainingSheet = spreadsheet.data.sheets?.find(sheet => 
-        sheet.properties?.title?.toLowerCase().includes('training plan')
-      );
-
-      if (!trainingSheet?.properties?.title) {
-        return NextResponse.json(
-          { error: 'No training plan sheet found' },
-          { status: 404 }
-        );
-      }
-
-      // Get the data from the sheet
+      // Get the data from the Current Block sheet
       const response = await sheets.spreadsheets.values.get({
         spreadsheetId,
-        range: trainingSheet.properties.title,
+        range: 'Current Block',
       });
 
       const values = response.data.values || [];
@@ -132,7 +114,6 @@ export async function POST(request: Request) {
     let targetSpreadsheetId = spreadsheetId;
 
     // If no spreadsheetId is provided, create a new spreadsheet
-    console.log("spreadsheettitle: ", title)
     if (!targetSpreadsheetId) {
       const spreadsheet = await sheets.spreadsheets.create({
         requestBody: {
@@ -142,7 +123,12 @@ export async function POST(request: Request) {
           sheets: [
             {
               properties: {
-                title: sheetName,
+                title: 'Current Block',
+              },
+            },
+            {
+              properties: {
+                title: 'History',
               },
             },
           ],
@@ -163,40 +149,61 @@ export async function POST(request: Request) {
           type: 'anyone',
         },
       });
-    } else {
-      // Verify the user has access to the spreadsheet
-      try {
-        await sheets.spreadsheets.get({
-          spreadsheetId: targetSpreadsheetId,
-        });
-      } catch (error) {
-        return NextResponse.json(
-          { error: 'You do not have access to this spreadsheet' },
-          { status: 403 }
-        );
-      }
-    }
 
-    // Get the current data range to determine where to append
-    let range = `${sheetName}!A1`;
-    if (append) {
-      const response = await sheets.spreadsheets.values.get({
+      // For new spreadsheets, just write to Current Block
+      await sheets.spreadsheets.values.update({
         spreadsheetId: targetSpreadsheetId,
-        range: sheetName,
+        range: 'Current Block!A1',
+        valueInputOption: 'RAW',
+        requestBody: {
+          values: data,
+        },
       });
-      const values = response.data.values || [];
-      range = `${sheetName}!A${values.length + 1}`;
-    }
+    } else {
+      // For existing spreadsheets, handle the sequence of operations
+      // 1. Get current data and append to history
+      const currentBlockResponse = await sheets.spreadsheets.values.get({
+        spreadsheetId: targetSpreadsheetId,
+        range: 'Current Block',
+      });
 
-    // Update the spreadsheet with data
-    await sheets.spreadsheets.values.update({
-      spreadsheetId: targetSpreadsheetId,
-      range,
-      valueInputOption: 'RAW',
-      requestBody: {
-        values: data,
-      },
-    });
+      const currentData = currentBlockResponse.data.values || [];
+      if (currentData.length > 0) {
+        // Get the last row of history to append to
+        const historyResponse = await sheets.spreadsheets.values.get({
+          spreadsheetId: targetSpreadsheetId,
+          range: 'History',
+        });
+        const historyValues = historyResponse.data.values || [];
+        const historyRange = `History!A${historyValues.length + 1}`;
+
+        // Append current data to history
+        await sheets.spreadsheets.values.update({
+          spreadsheetId: targetSpreadsheetId,
+          range: historyRange,
+          valueInputOption: 'RAW',
+          requestBody: {
+            values: currentData,
+          },
+        });
+      }
+
+      // 2. Clear the current block sheet
+      await sheets.spreadsheets.values.clear({
+        spreadsheetId: targetSpreadsheetId,
+        range: 'Current Block',
+      });
+
+      // 3. Add new data to current block
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: targetSpreadsheetId,
+        range: 'Current Block!A1',
+        valueInputOption: 'RAW',
+        requestBody: {
+          values: data,
+        },
+      });
+    }
 
     return NextResponse.json({
       success: true,
