@@ -34,3 +34,8 @@
 6. [X] when the application has the user credential, it should be reflected on the website itself. The login button shouldn't really appear.
    1. this has  been done to an extent, but the website now requires google based auth.
    2. Ideally, there should just be a header with a login button at the top of the page. Which would then reflect the users identity in the case that they're logged in.
+7. [ ] we should dockerize this guy so others can easily run it locally if they so desire
+   1. alternatively, this could just be published as a website
+* nice to haves
+1. create an actual UI
+2. include more than google auth
