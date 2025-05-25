@@ -6,8 +6,8 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: '5/3/1 Forever Calculator',
-  description: 'Calculate your 5/3/1 Forever training blocks with ease',
+  title: '531 Training',
+  description: 'Create and manage your 531 training program',
 };
 
 export default function RootLayout({
@@ -24,7 +24,7 @@ export default function RootLayout({
           </div>
         </header>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID!}>
+          <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
             {children}
           </GoogleOAuthProvider>
         </main>
