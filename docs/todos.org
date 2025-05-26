@@ -30,26 +30,22 @@
       2. [X] it should be a non-blocking operation
       3. [X] it should be apparent to the user that the backend is performing some auth related action
    4. [ ] is this done securely?
-	 
 6. [X] when the application has the user credential, it should be reflected on the website itself. The login button shouldn't really appear.
    1. this has  been done to an extent, but the website now requires google based auth.
    2. Ideally, there should just be a header with a login button at the top of the page. Which would then reflect the users identity in the case that they're logged in.
 7. [X] we should dockerize this guy so others can easily run it locally if they so desire
    1. alternatively, this could just be published as a website
-8. [ ] create a readme.md indicating what this is about and how to run it lcoally
-   1. [ ] what is this application about
+8. [X] create a readme.md indicating what this is about and how to run it lcoally
+   1. [X] what is this application about
       1. this is a 531 calculator that uses the 531 forever framework
       2. the application allows users to auth into google and persist their data to a spreadsheet.
       3. it is possible to reuse an existing spreadsheet
-   2. [ ] how to run
+   2. [X] how to run
       1. in its current state its really set up to be ran as a public website.
       2. to use it, a user needs to set up [[https://console.cloud.google.com][google api access]].
 	 1. denote the required scopes
       3. denote the relevant environment variables
       4. denote how to build and run with docker compose
-	    
-	 
-      
 * nice to haves
 1. create an actual UI
 2. include more than google auth
