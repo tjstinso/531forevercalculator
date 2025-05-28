@@ -15,6 +15,7 @@ import type {
   SupplementalTemplateType,
   Set,
   Template,
+  TemplateWeek,
   LiftInputType
 } from '../types/workout';
 
@@ -55,39 +56,43 @@ export const getMainWorkSets = (progressionType: ProgressionType, weekProgressio
 };
 
 // First Set Last (FSL) template generator
-export const getFSLTemplate = (progressionType: ProgressionType, templateType: TemplateType): Template => {
-  const mainWork = getMainWorkSets(progressionType);
+export const getFSLTemplate = (progressionType: ProgressionType, templateType: TemplateType, weekProgression : WeekProgression): Template => {
+    const mainWork = getMainWorkSets(progressionType, weekProgression);
+  type getPercentage = (_set: TemplateWeek) => number;
+  let fn: getPercentage = _sets => _sets.mainSets[0].percentage;
   return {
     week1: {
       mainSets: mainWork.week1.mainSets,
-      supplementalSets: Array(5).fill({ type: 'standard', reps: 5, percentage: 0.65 } as const),
+	supplementalSets: Array(5).fill({ type: 'standard', reps: 5, percentage: fn(mainWork.week1) } as const),
     },
     week2: {
       mainSets: mainWork.week2.mainSets,
-      supplementalSets: Array(5).fill({ type: 'standard', reps: 5, percentage: 0.70 } as const),
+	supplementalSets: Array(5).fill({ type: 'standard', reps: 5, percentage: fn(mainWork.week2) } as const),
     },
     week3: {
       mainSets: mainWork.week3.mainSets,
-      supplementalSets: Array(5).fill({ type: 'standard', reps: 5, percentage: 0.75 } as const),
+	supplementalSets: Array(5).fill({ type: 'standard', reps: 5, percentage: fn(mainWork.week3) } as const),
     },
   };
 };
 
 // Second Set Last (SSL) template generator
-export const getSSLTemplate = (progressionType: ProgressionType, templateType: TemplateType): Template => {
-  const mainWork = getMainWorkSets(progressionType);
+export const getSSLTemplate = (progressionType: ProgressionType, templateType: TemplateType, weekProgression: WeekProgression): Template => {
+    const mainWork = getMainWorkSets(progressionType, weekProgression);
+  type getPercentage = (_set: TemplateWeek) => number;
+  let fn: getPercentage = _sets => _sets.mainSets[1].percentage;
   return {
     week1: {
       mainSets: mainWork.week1.mainSets,
-      supplementalSets: Array(5).fill({ type: 'standard', reps: 5, percentage: 0.75 } as const),
+	supplementalSets: Array(5).fill({ type: 'standard', reps: 5, percentage: fn(mainWork.week1) } as const),
     },
     week2: {
       mainSets: mainWork.week2.mainSets,
-      supplementalSets: Array(5).fill({ type: 'standard', reps: 5, percentage: 0.80 } as const),
+	supplementalSets: Array(5).fill({ type: 'standard', reps: 5, percentage: fn(mainWork.week2) } as const),
     },
     week3: {
       mainSets: mainWork.week3.mainSets,
-      supplementalSets: Array(5).fill({ type: 'standard', reps: 5, percentage: 0.85 } as const),
+	supplementalSets: Array(5).fill({ type: 'standard', reps: 5, percentage: fn(mainWork.week3) } as const),
     },
   };
 };
@@ -148,8 +153,8 @@ const createCycle = (
       // Add supplemental work if specified
       if (supplementalTemplate) {
         const template = 
-          supplementalTemplate === 'FSL' ? getFSLTemplate(progressionType, templateType) :
-          supplementalTemplate === 'SSL' ? getSSLTemplate(progressionType, templateType) :
+              supplementalTemplate === 'FSL' ? getFSLTemplate(progressionType, templateType, weekProgression) :
+              supplementalTemplate === 'SSL' ? getSSLTemplate(progressionType, templateType, weekProgression) :
           getBBBTemplate(progressionType, templateType);
         
         const supplementalSets = template[weekKey].supplementalSets.map(set => ({

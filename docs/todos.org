@@ -46,6 +46,13 @@
 	 1. denote the required scopes
       3. denote the relevant environment variables
       4. denote how to build and run with docker compose
+9. [ ] create a nice UI for this application
+   1. there should be navigation bar at the top of the page
+      1. the title of the application should be on the left of the navbar
+      2. auth related interactions should be on the top right. The option to login and see if the current user is logged in
+	 
 * nice to haves
-1. create an actual UI
-2. include more than google auth
+1. [ ] create an actual UI
+   1.  
+
+2. include more auth providers than google
